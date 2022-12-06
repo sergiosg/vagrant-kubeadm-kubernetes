@@ -5,8 +5,7 @@
 set -euxo pipefail
 
 # Variable Declaration
-
-KUBERNETES_VERSION="1.23.6-00"
+KUBERNETES_VERSION="1.23.14-00"
 
 # disable swap
 sudo swapoff -a
@@ -14,18 +13,13 @@ sudo swapoff -a
 # keeps the swaf off during reboot
 (crontab -l 2>/dev/null; echo "@reboot /sbin/swapoff -a") | crontab - || true
 sudo apt-get update -y
-# Install CRI-O Runtime
 
-OS="xUbuntu_20.04"
-
-VERSION="1.23"
 
 # Create the .conf file to load the modules at bootup
 cat <<EOF | sudo tee /etc/modules-load.d/crio.conf
 overlay
 br_netfilter
 EOF
-
 sudo modprobe overlay
 sudo modprobe br_netfilter
 
@@ -38,23 +32,15 @@ EOF
 
 sudo sysctl --system
 
-cat <<EOF | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/ /
-EOF
-cat <<EOF | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:$VERSION.list
-deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/ /
-EOF
 
-curl -L https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:$VERSION/$OS/Release.key | sudo apt-key --keyring /etc/apt/trusted.gpg.d/libcontainers.gpg add -
-curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/Release.key | sudo apt-key --keyring /etc/apt/trusted.gpg.d/libcontainers.gpg add -
+# Install containerd
 
-sudo apt-get update
-sudo apt-get install cri-o cri-o-runc -y
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt-get install containerd -y
 
-sudo systemctl daemon-reload
-sudo systemctl enable crio --now
+echo "Containerd runtime installed susccessfully"
 
-echo "CRI runtime installed susccessfully"
+
 
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl
