@@ -10,15 +10,15 @@ Vagrant.configure("2") do |config|
       echo "$IP_NW$((IP_START+2)) worker-node02" >> /etc/hosts
   SHELL
 
-  config.vm.box = "bento/ubuntu-22.04"
+  config.vm.box = "sergiosg9823/k8s-base"
+  config.vm.box_version = "1.25"
   config.vm.box_check_update = true
 
   config.vm.define "master" do |master|
-    # master.vm.box = "bento/ubuntu-18.04"
     master.vm.hostname = "master-node"
     master.vm.network "private_network", ip: IP_NW + "#{IP_START}"
     master.vm.provider "virtualbox" do |vb|
-        vb.memory = 4048
+        vb.memory = 4096
         vb.cpus = 2
     end
     master.vm.provision "shell", path: "scripts/common.sh"
@@ -31,8 +31,8 @@ Vagrant.configure("2") do |config|
     node.vm.hostname = "worker-node0#{i}"
     node.vm.network "private_network", ip: IP_NW + "#{IP_START + i}"
     node.vm.provider "virtualbox" do |vb|
-        vb.memory = 2048
-        vb.cpus = 1
+        vb.memory = 4096
+        vb.cpus = 2
     end
     node.vm.provision "shell", path: "scripts/common.sh"
     node.vm.provision "shell", path: "scripts/node.sh"
